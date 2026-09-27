@@ -1,5 +1,7 @@
 # Fermi Unplugged
 
+[![CI](https://github.com/defl/fermi-unplugged/actions/workflows/ci.yml/badge.svg)](https://github.com/defl/fermi-unplugged/actions/workflows/ci.yml) [![License](https://img.shields.io/badge/license-GPL--3.0%20%2B%20Commons%20Clause-blue)](LICENSE.txt)
+
 An unofficial Python client for the Dirac Live protocol on devices. It lets you
 inspect a device's Dirac filter engine and load your own filters from
 Python, over your local network.
