@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "fermi-unplugged"
+version = "0.1.0"
+description = "Unofficial Dirac Live protocol client for devices"
+readme = "README.md"
+license = "GPL-3.0-only AND LicenseRef-Commons-Clause"
+license-files = ["LICENSE.txt"]
+requires-python = ">=3.10"
+dependencies = [
+    "grpcio",
+    "protobuf>=7.35.1",
+    "numpy",
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[tool.setuptools.packages.find]
+include = ["fermi_unplugged*"]
+[tool.setuptools.package-data]
+fermi_unplugged = ["protos/*.proto"]

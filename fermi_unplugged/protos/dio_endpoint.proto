@@ -1,0 +1,178 @@
+// Regenerate dio_endpoint_pb2.py after editing:
+//   python -m grpc_tools.protoc -I fermi_unplugged/protos \
+//       --python_out=fermi_unplugged fermi_unplugged/protos/dio_endpoint.proto
+
+syntax = "proto3";
+
+// The package and service name form the gRPC method path
+// (/dio.endpoint.EndpointDevice/<Method>), so they must match the device.
+package dio.endpoint;
+
+service EndpointDevice {
+  rpc GetDeviceInfo(Void) returns (DeviceInfo);
+  rpc GetSlotInfo(Index) returns (SlotInfo);
+  rpc GetActiveSlot(Void) returns (Index);
+  rpc GetFilterInfo(FilterInfoQuery) returns (FilterInfo);
+  rpc BeginFilterTransfer(SlotInfo) returns (Void);
+  rpc SetTransferCell(CellIndex) returns (Void);
+  rpc SetFilterCell(FilterCell) returns (Void);
+  rpc SetFilterCommon(FilterCommon) returns (Void);
+  rpc EndFilterTransfer(Index) returns (stream Progress);
+  rpc UpdateSlotInfo(SlotInfoUpdate) returns (Void);
+  rpc SetActiveSlot(Index) returns (Void);
+  rpc DeleteSlot(Index) returns (Void);
+}
+
+// ── Generic ─────────────────────────────────────────────────────
+
+message Void {}
+
+message Index {
+  int32 i = 1;
+}
+
+message Progress {
+  float progress = 1;
+  string message = 2;
+}
+
+message UUID {
+  uint64 low = 1;
+  uint64 high = 2;
+}
+
+// ── Device ──────────────────────────────────────────────────────
+
+message DeviceInfo {
+  string manufacturer = 1;
+  string name = 2;
+  string model_name = 3;
+  string unique_device_identifier = 4;
+  int32 num_speakers = 5;
+  int32 num_mics = 6;
+  int32 num_filter_slots = 7;
+  string system_name = 8;
+}
+
+// ── Filter slots ────────────────────────────────────────────────
+
+message SlotMetadata {
+  string endpoint_manufacturer = 1;
+  string endpoint_model = 2;
+  UUID endpoint_uuid = 3;
+}
+
+message SlotInfo {
+  int32 slot_index = 1;
+  string name = 2;
+  string filter_type_name = 3;
+  int32 num_inputs = 4;
+  int32 num_outputs = 5;
+  int32 max_delay = 6;
+  float min_gain = 7;
+  float max_gain = 8;
+  int32 num_sections = 9;
+  int64 creation_time = 10;
+  UUID unique_id = 11;
+  string description = 12;
+  SlotMetadata slot_metadata = 15;
+}
+
+message SlotInfoUpdate {
+  int32 slot_index = 1;
+  string name = 2;
+  string filter_type_name = 3;
+  string description = 4;
+}
+
+// ── Filter capabilities ─────────────────────────────────────────
+
+// type: 6 = multi-rate FIR, 7 = resampler.
+message FilterInfoQuery {
+  int32 variant = 1;
+  int32 type = 2;
+}
+
+message FilterInfo {
+  oneof info {
+    MRFIRInfo mrfir = 6;
+    ResampleInfo resample = 7;
+  }
+}
+
+message MRFIRLayerInfo {
+  int32 num_fir_taps = 1;
+  int32 max_bulk_delay = 2;
+  int32 resample_info_variant = 3;
+}
+
+message MRFIRInfo {
+  int32 variant = 1;
+  float samplerate = 2;
+  repeated MRFIRLayerInfo layers = 3;
+}
+
+message ResampleStageInfo {
+  int32 factor = 1;
+  oneof max_coeffs {
+    int32 num_sos = 2;
+    int32 num_fir_taps = 3;
+  }
+}
+
+// type: 1 = IIR, 2 = FIR.
+message ResampleInfo {
+  int32 variant = 1;
+  int32 type = 2;
+  repeated ResampleStageInfo stages = 3;
+}
+
+// ── Filter data ─────────────────────────────────────────────────
+
+message FIR {
+  repeated float fir_taps = 2;
+}
+
+message MRFIRLayer {
+  FIR fir = 1;
+  int32 bulk_delay = 2;
+}
+
+message MRFIR {
+  MRFIRInfo info = 1;
+  repeated MRFIRLayer layers = 2;
+}
+
+message CellIndex {
+  int32 input_idx = 1;
+  int32 output_idx = 2;
+  int32 section_idx = 3;
+}
+
+message FilterCell {
+  int32 input_idx = 1;
+  int32 output_idx = 2;
+  int32 cell_delay = 20;
+  oneof filter {
+    MRFIR mrfir = 9;
+  }
+}
+
+message ResampleStage {
+  int32 factor = 1;
+  oneof coeffs {
+    FIR fir = 3;
+  }
+}
+
+message ResampleCoeffsCommon {
+  int32 variant = 1;
+  int32 type = 2;
+  repeated ResampleStage stages = 3;
+}
+
+message FilterCommon {
+  oneof common {
+    ResampleCoeffsCommon resample = 2;
+  }
+}
